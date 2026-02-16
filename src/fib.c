@@ -51,13 +51,13 @@ void print_formatted_time(uint64_t ns) {
     printf("Calculation time: ");
 
     if (ns < NS_IN_US)
-        printf("%" PRIu64 " ns\n", ns);
+        printf("%" PRIu64 "ns\n", ns);
     else if (ns < NS_IN_MS)
-        printf("%.3f us\n", ns / 1000.0);
+        printf("%.3fus\n", ns / 1000.0);
     else if (ns < NS_IN_S)
-        printf("%.3f ms\n", ns / 1000000.0);
+        printf("%.3fms\n", ns / 1000000.0);
     else
-        printf("%.3f s\n", ns / 1000000000.0);
+        printf("%.3fs\n", ns / 1000000000.0);
 }
 
 int main(int argc, char *argv[]) {
