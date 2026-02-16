@@ -1,13 +1,17 @@
-CC = gcc
+CC = cc
 FLAGS = -O3 -Wall -lgmp
 
-SRC = src/fib.c
-TGT = bin/fib
+SRC = src
+BIN = bin
 
-all: $(TGT)
+SRCS = $(wildcard $(SRC)/*.c)
 
-$(TGT): $(SRC)
-	$(CC) $(FLAGS) -o $(TGT) $(SRC)
+BINS = $(patsubst $(SRC)/%.c, $(BIN)/%, $(SRCS))
+
+all: $(BINS)
+
+$(BIN)/%: $(SRC)/%.c
+	$(CC) $(FLAGS) $< -o $@
 
 clean:
-	rm -f $(TGT)
+	rm -rf $(BIN)

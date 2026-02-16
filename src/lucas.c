@@ -108,16 +108,16 @@ int main(int argc, char *argv[]) {
     while (i > 0) {
         --i;
 
-        mpz_mul_2exp(t1, b, 1);
-        mpz_sub(t1, t1, a);
-        mpz_mul(t_a, a, t1);
+        mpz_mul(t1, a, a);
+        mpz_mul(t2, a, b);
 
-        mpz_mul(t2, b, t1);
-
-        if ((n >> (i + 1)) & 1)
+        if ((n >> (i + 1)) & 1) {
+            mpz_add_ui(t_a, t1, 2);
             mpz_add_ui(b, t2, 1);
-        else
+        } else {
+            mpz_sub_ui(t_a, t1, 2);
             mpz_sub_ui(b, t2, 1);
+        }
 
         mpz_swap(a, t_a);
 
