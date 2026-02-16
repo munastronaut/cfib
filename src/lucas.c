@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 
     uint64_t elapsed_ns = end - start;
 
-    printf("F_%" PRIu64 " = ", n);
+    printf("L_%" PRIu64 " = ", n);
     mpz_out_str(stdout, 10, a);
     putchar('\n');
     print_formatted_time(elapsed_ns);
