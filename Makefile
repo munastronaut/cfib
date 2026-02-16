@@ -11,6 +11,7 @@ BINS = $(patsubst $(SRC)/%.c, $(BIN)/%, $(SRCS))
 all: $(BINS)
 
 $(BIN)/%: $(SRC)/%.c
+	mkdir -p $(dir $@)
 	$(CC) $(FLAGS) $< -o $@
 
 clean:
