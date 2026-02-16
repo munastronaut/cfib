@@ -31,9 +31,10 @@
 
 char const *message = "Usage: %s [OPTIONS] [NUMBER]\n\n"
                       "OPTIONS:\n"
-                      "  -n\t Print number only\n"
-                      "  -t\t Print calculation time only\n"
-                      "  -h\t Show help\n";
+                      "  -n, --number\t Print number only\n"
+                      "  -r, --raw\t Print number only, without newline\n"
+                      "  -t, --time\t Print calculation time only\n"
+                      "  -h, --help\t Show help\n";
 
 uint64_t get_ns() {
 #if defined(_WIN32)
@@ -100,9 +101,10 @@ void print_calc_time(uint64_t ns) {
 }
 
 int main(int argc, char *argv[]) {
-    int request_help = 0;
     int output_num = 1;
+    int no_newline = 0;
     int output_time = 1;
+    int request_help = 0;
     char *num_arg = NULL;
 
     if (argc < 2) {
@@ -112,12 +114,18 @@ int main(int argc, char *argv[]) {
     }
 
     for (size_t i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-h") == 0) {
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             request_help = 1;
             goto usage;
-        } else if (strcmp(argv[i], "-n") == 0) {
+        } else if (strcmp(argv[i], "-n") == 0 ||
+                   strcmp(argv[i], "--number") == 0) {
             output_time = 0;
-        } else if (strcmp(argv[i], "-t") == 0) {
+        } else if (strcmp(argv[i], "-r") == 0 ||
+                   strcmp(argv[i], "--raw") == 0) {
+            output_time = 0;
+            no_newline = 1;
+        } else if (strcmp(argv[i], "-t") == 0 ||
+                   strcmp(argv[i], "--time") == 0) {
             output_num = 0;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
             fprintf(stderr, "Error: Unknown option %s\n", argv[i]);
@@ -206,7 +214,8 @@ int main(int argc, char *argv[]) {
             printf("F_%" PRIu64 " = ", n);
 
         mpz_out_str(stdout, 10, a);
-        putchar('\n');
+        if (!no_newline)
+            putchar('\n');
     }
 
     if (output_time)
