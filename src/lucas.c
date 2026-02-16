@@ -29,6 +29,12 @@
 
 #define LOG2_PHI 0.694242
 
+char const *message = "Usage: %s [OPTIONS] [NUMBER]\n\n"
+                      "OPTIONS:\n"
+                      "  -n\t Print number only\n"
+                      "  -t\t Print calculation time only\n"
+                      "  -h\t Show help\n";
+
 uint64_t get_ns() {
 #if defined(_WIN32)
     static LARGE_INTEGER frequency;
@@ -94,20 +100,22 @@ void print_calc_time(uint64_t ns) {
 }
 
 int main(int argc, char *argv[]) {
+    int request_help = 0;
     int output_num = 1;
     int output_time = 1;
     char *num_arg = NULL;
 
     if (argc < 2) {
     usage:
-        fprintf(stderr, "Usage: %s [-n | -t] NUMBER\n", argv[0]);
-        fputs("  -n\t Print number only\n", stderr);
-        fputs("  -t\t Print calculation time only\n", stderr);
-        return EXIT_FAILURE;
+        fprintf(request_help ? stdout : stderr, message, argv[0]);
+        return request_help ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     for (size_t i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-n") == 0) {
+        if (strcmp(argv[i], "-h") == 0) {
+            request_help = 1;
+            goto usage;
+        } else if (strcmp(argv[i], "-n") == 0) {
             output_time = 0;
         } else if (strcmp(argv[i], "-t") == 0) {
             output_num = 0;
