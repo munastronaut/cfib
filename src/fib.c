@@ -65,7 +65,7 @@ uint64_t get_ns() {
 }
 
 void print_calc_time(uint64_t ns) {
-    printf("Calculation time: ");
+    printf("calculation time: ");
 
     if (ns < NS_IN_US) {
         printf("%" PRIu64 "ns\n", ns);
@@ -128,12 +128,12 @@ int main(int argc, char *argv[]) {
                    strcmp(argv[i], "--time") == 0) {
             output_num = 0;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
-            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);
-            return EXIT_FAILURE;
+            fprintf(stderr, "%s: unknown option %s\n", argv[0], argv[i]);
+            goto usage;
         } else {
             if (num_arg != NULL) {
-                fputs("Error: Multiple numbers passed\n", stderr);
-                return EXIT_FAILURE;
+                fprintf(stderr, "%s: multiple numbers passed\n", argv[0]);
+                goto usage;
             }
             num_arg = argv[i];
         }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
         ++p;
 
     if (*p == '-') {
-        fputs("Error: Input must be a nonnegative integer\n", stderr);
+        fprintf(stderr, "%s: input must be a nonnegative integer\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -162,12 +162,12 @@ int main(int argc, char *argv[]) {
     uint64_t n = strtoull(num_arg, &endptr, 10);
 
     if (errno == ERANGE) {
-        fputs("Error: Value outside of unsigned 64-bit integer range\n",
-              stderr);
+        fprintf(stderr, "%s: value outside of unsigned 64-bit integer range\n",
+                argv[0]);
         return EXIT_FAILURE;
     }
     if (endptr == num_arg || *endptr != '\0') {
-        fputs("Error: Could not parse number input\n", stderr);
+        fprintf(stderr, "%s: could not parse number input\n", argv[0]);
         return EXIT_FAILURE;
     }
 
