@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 199309L
+#include <stdint.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -14,7 +15,11 @@
 #include <time.h>
 #endif
 
-double get_seconds() {
+#define NS_IN_US 1000
+#define NS_IN_MS 1000000
+#define NS_IN_S 1000000000
+
+uint64_t get_ns() {
 #if defined(_WIN32)
     static LARGE_INTEGER frequency;
     static int init = 0;
@@ -24,7 +29,8 @@ double get_seconds() {
     }
     LARGE_INTEGER counter;
     QueryPerformanceCounter(&counter);
-    return (double)counter.QuadPart / frequency.QuadPart;
+    return (uint64_t)((counter.QuadPart * INT64_C(1000000000)) /
+                      frequency.QuadPart);
 #elif defined(__APPLE__)
     static mach_timebase_info_data_t info;
     static int init = 0;
@@ -33,12 +39,25 @@ double get_seconds() {
         init = 1;
     }
     uint64_t now = mach_absolute_time();
-    return ((double)now * info.numer / info.denom) / 1e9;
+    return now * info.numer / info.denom;
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
+    return (uint64_t)ts.tv_sec * UINT64_C(1000000000) + ts.tv_nsec;
 #endif
+}
+
+void print_formatted_time(uint64_t ns) {
+    printf("Calculation time: ");
+
+    if (ns < NS_IN_US)
+        printf("%" PRIu64 " ns\n", ns);
+    else if (ns < NS_IN_MS)
+        printf("%.3f us\n", ns / 1000.0);
+    else if (ns < NS_IN_S)
+        printf("%.3f ms\n", ns / 1000000.0);
+    else
+        printf("%.3f s\n", ns / 1000000000.0);
 }
 
 int main(int argc, char *argv[]) {
@@ -67,7 +86,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     if (endptr == argv[1] || *endptr != '\0') {
-        fputs("Error: Could not parse numeric input\n", stderr);
+        fputs("Error: Could not parse number input\n", stderr);
         return EXIT_FAILURE;
     }
 
@@ -84,7 +103,7 @@ int main(int argc, char *argv[]) {
 
     uint64_t i = n == 0 ? 0 : 64 - __builtin_clzll(n);
 
-    double start = get_seconds();
+    uint64_t start = get_ns();
 
     while (i > 0) {
         --i;
@@ -109,14 +128,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    double end = get_seconds();
+    uint64_t end = get_ns();
 
-    double elapsed_seconds = end - start;
+    uint64_t elapsed_ns = end - start;
 
     printf("F_%" PRIu64 " = ", n);
     mpz_out_str(stdout, 10, a);
     putchar('\n');
-    printf("Calculation time: %lf seconds\n", elapsed_seconds);
+    print_formatted_time(elapsed_ns);
 
     fflush(stdout);
 
