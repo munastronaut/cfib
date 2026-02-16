@@ -47,17 +47,40 @@ uint64_t get_ns() {
 #endif
 }
 
-void print_formatted_time(uint64_t ns) {
+void print_calc_time(uint64_t ns) {
     printf("Calculation time: ");
 
-    if (ns < NS_IN_US)
+    if (ns < NS_IN_US) {
         printf("%" PRIu64 "ns\n", ns);
-    else if (ns < NS_IN_MS)
-        printf("%.3fus\n", ns / 1000.0);
-    else if (ns < NS_IN_S)
-        printf("%.3fms\n", ns / 1000000.0);
-    else
-        printf("%.3fs\n", ns / 1000000000.0);
+        return;
+    }
+
+    double val;
+    char const *unit;
+
+    if (ns < NS_IN_MS) {
+        val = ns / 1000.0;
+        unit = "us";
+    } else if (ns < NS_IN_S) {
+        val = ns / 1000000.0;
+        unit = "ms";
+    } else {
+        val = ns / 1000000000.0;
+        unit = "s";
+    }
+
+    char buf[64];
+    int len = snprintf(buf, sizeof(buf), "%.3f", val);
+
+    char *p = buf + len - 1;
+
+    while (p > buf && *p == '0')
+        *p-- = '\0';
+
+    if (p > buf && *p == '.')
+        *p-- = '\0';
+
+    printf("%s%s\n", buf, unit);
 }
 
 int main(int argc, char *argv[]) {
@@ -135,7 +158,7 @@ int main(int argc, char *argv[]) {
     printf("L_%" PRIu64 " = ", n);
     mpz_out_str(stdout, 10, a);
     putchar('\n');
-    print_formatted_time(elapsed_ns);
+    print_calc_time(elapsed_ns);
 
     fflush(stdout);
 
