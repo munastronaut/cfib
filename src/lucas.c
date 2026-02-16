@@ -1,4 +1,5 @@
 #define _DEFAULT_SOURCE
+#include <string.h>
 #include <stdint.h>
 #include <ctype.h>
 #include <errno.h>
@@ -6,18 +7,27 @@
 #include <gmp.h>
 #include <inttypes.h>
 #include <stdlib.h>
-#define LOG2_PHI 0.694242
 #if defined(_WIN32)
 #include <windows.h>
+#include <intrin.h>
+#pragma intrinsic(__lzcnt)
 #elif defined(__APPLE__)
 #include <mach/mach_time.h>
 #else
 #include <time.h>
 #endif
 
+#if defined(__WIN32)
+#define COUNT_LEADING_ZEROS(x) __lzcnt64((x))
+#else
+#define COUNT_LEADING_ZEROS(x) __builtin_clzll((x))
+#endif
+
 #define NS_IN_US 1000
 #define NS_IN_MS 1000000
 #define NS_IN_S 1000000000
+
+#define LOG2_PHI 0.694242
 
 uint64_t get_ns() {
 #if defined(_WIN32)
@@ -84,12 +94,44 @@ void print_calc_time(uint64_t ns) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <number>\n", argv[0]);
+    int output_num = 1;
+    int output_time = 1;
+    char *num_arg = NULL;
+
+    if (argc < 2) {
+    usage:
+        fprintf(stderr, "Usage: %s [-n | -t] NUMBER\n", argv[0]);
+        fputs("  -n\t Print number only\n", stderr);
+        fputs("  -t\t Print calculation time only\n", stderr);
         return EXIT_FAILURE;
     }
 
-    char *p = argv[1];
+    for (size_t i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "-n") == 0) {
+            output_time = 0;
+        } else if (strcmp(argv[i], "-t") == 0) {
+            output_num = 0;
+        } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
+            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);
+            return EXIT_FAILURE;
+        } else {
+            if (num_arg != NULL) {
+                fputs("Error: Multiple numbers passed\n", stderr);
+                return EXIT_FAILURE;
+            }
+            num_arg = argv[i];
+        }
+    }
+
+    if (output_time == output_num && output_num == 0) {
+        fputs("?\n", stderr);
+        return EXIT_FAILURE;
+    }
+
+    if (!num_arg)
+        goto usage;
+
+    char *p = num_arg;
     while (isspace(*p))
         ++p;
 
@@ -101,14 +143,14 @@ int main(int argc, char *argv[]) {
     errno = 0;
     char *endptr;
 
-    uint64_t n = strtoull(argv[1], &endptr, 10);
+    uint64_t n = strtoull(num_arg, &endptr, 10);
 
     if (errno == ERANGE) {
         fputs("Error: Value outside of unsigned 64-bit integer range\n",
               stderr);
         return EXIT_FAILURE;
     }
-    if (endptr == argv[1] || *endptr != '\0') {
+    if (endptr == num_arg || *endptr != '\0') {
         fputs("Error: Could not parse number input\n", stderr);
         return EXIT_FAILURE;
     }
@@ -124,10 +166,9 @@ int main(int argc, char *argv[]) {
     mpz_set_ui(a, 0);
     mpz_set_ui(b, 1);
 
-    uint64_t i = n == 0 ? 0 : 64 - __builtin_clzll(n);
+    uint64_t i = n == 0 ? 0 : 64 - COUNT_LEADING_ZEROS(n);
 
     uint64_t start = get_ns();
-
     while (i > 0) {
         --i;
 
@@ -150,15 +191,18 @@ int main(int argc, char *argv[]) {
             mpz_swap(b, t1);
         }
     }
-
     uint64_t end = get_ns();
 
-    uint64_t elapsed_ns = end - start;
+    if (output_num) {
+        if (output_time)
+            printf("L_%" PRIu64 " = ", n);
 
-    printf("L_%" PRIu64 " = ", n);
-    mpz_out_str(stdout, 10, a);
-    putchar('\n');
-    print_calc_time(elapsed_ns);
+        mpz_out_str(stdout, 10, a);
+        putchar('\n');
+    }
+
+    if (output_time)
+        print_calc_time(end - start);
 
     fflush(stdout);
 
