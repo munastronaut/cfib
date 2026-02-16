@@ -17,7 +17,7 @@
 #include <time.h>
 #endif
 
-#if defined(__WIN32)
+#if defined(_WIN32)
 #define COUNT_LEADING_ZEROS(x) __lzcnt64((x))
 #else
 #define COUNT_LEADING_ZEROS(x) __builtin_clzll((x))
