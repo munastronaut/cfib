@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
     mpz_init2(t1, bits);
     mpz_init2(t2, bits);
     mpz_init2(t_a, bits);
-    mpz_set_ui(a, 0);
+    mpz_set_ui(a, 2);
     mpz_set_ui(b, 1);
 
     uint64_t i = n == 0 ? 0 : 64 - COUNT_LEADING_ZEROS(n);
