@@ -7,10 +7,10 @@ char const *message =
     "  <index>\t\tthe index of the Lucas number\n"
     "\n"
     "\x1b[4;1mOptions:\x1b[0m\n"
-    "\x1b[1m  -n, --num-only\x1b[0m\t Print number only\n"
-    "\x1b[1m  -r, --raw-only\x1b[0m\t Print number only, without newline\n"
-    "\x1b[1m  -t, --time-only\x1b[0m\t Print calculation time only\n"
-    "\x1b[1m  -h, --help\x1b[0m\t\t Print this help and exit\n";
+    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only\n"
+    "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline\n"
+    "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
+    "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
 
 char const *prompt_help =
     "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
