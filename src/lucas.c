@@ -4,7 +4,7 @@ char const *message =
     "A program that calculates Lucas numbers\n"
     "\n" USAGE "\n"
     "\x1b[4;1mArguments:\x1b[0m\n"
-    "  <index>\tthe index of the Lucas number\n"
+    "  <index>\t\tthe index of the Lucas number\n"
     "\n"
     "\x1b[4;1mOptions:\x1b[0m\n"
     "\x1b[1m  -n, --num-only\x1b[0m\t Print number only\n"
