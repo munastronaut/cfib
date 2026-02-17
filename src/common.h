@@ -1,4 +1,4 @@
-#if defined(__linux__) || defined(__FreeBsd__)
+#if defined(__linux__) || defined(__FreeBSD__)
 #define _DEFAULT_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #elif defined(__APPLE__)
