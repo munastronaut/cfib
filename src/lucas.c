@@ -1,14 +1,19 @@
 #include "common.h"
 
 char const *message =
-    "\x1b[4;1mUsage:\x1b[0m\n"
-    "\x1b[1m  %s\x1b[0m [OPTION] [NUMBER]\n"
+    "A program that calculates Lucas numbers\n"
+    "\n" USAGE "\n"
+    "\x1b[4;1mArguments:\x1b[0m\n"
+    "  <index>\tthe index of the Lucas number\n"
     "\n"
     "\x1b[4;1mOptions:\x1b[0m\n"
     "\x1b[1m  -n, --num-only\x1b[0m\t Print number only\n"
     "\x1b[1m  -r, --raw-only\x1b[0m\t Print number only, without newline\n"
     "\x1b[1m  -t, --time-only\x1b[0m\t Print calculation time only\n"
     "\x1b[1m  -h, --help\x1b[0m\t\t Print this help and exit\n";
+
+char const *prompt_help =
+    "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
 
 uint64_t get_ns() {
 #if defined(_WIN32)
@@ -90,14 +95,16 @@ int main(int argc, char *argv[]) {
                    strcmp(argv[i], "--time-only") == 0) {
             flags &= ~OUTPUT_NUM;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
-            fprintf(stderr, "\x1b[1m%s:\x1b[0m unknown option %s\n", argv[0],
-                    argv[i]);
-            goto usage;
+            fprintf(
+                stderr,
+                "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
+                argv[0], argv[i]);
+            goto error_print;
         } else {
             if (num_arg != NULL) {
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple numbers passed\n",
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n",
                         argv[0]);
-                goto usage;
+                goto error_print;
             }
             num_arg = argv[i];
         }
@@ -110,9 +117,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (!num_arg) {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m input number not provided\n",
-                argv[0]);
-        goto usage;
+        fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
+        goto error_print;
     }
 
     char *p = num_arg;
@@ -121,9 +127,9 @@ int main(int argc, char *argv[]) {
 
     if (*p == '-') {
         fprintf(stderr,
-                "\x1b[1m%s:\x1b[0m input must be a nonnegative integer\n",
+                "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n",
                 argv[0]);
-        goto usage;
+        goto error_print;
     }
 
     errno = 0;
@@ -133,15 +139,14 @@ int main(int argc, char *argv[]) {
 
     if (errno == ERANGE) {
         fprintf(stderr,
-                "\x1b[1m%s:\x1b[0m value outside of unsigned 64-bit integer "
+                "\x1b[1m%s:\x1b[0m index outside of unsigned 64-bit integer "
                 "range\n",
                 argv[0]);
-        goto usage;
+        goto error_print;
     }
     if (endptr == num_arg || *endptr != '\0') {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m could not parse number input\n",
-                argv[0]);
-        goto usage;
+        fprintf(stderr, "\x1b[1m%s:\x1b[0m could not parse index\n", argv[0]);
+        goto error_print;
     }
 
     size_t bits = (size_t)(n * LOG2_PHI) + 2;
@@ -199,4 +204,7 @@ int main(int argc, char *argv[]) {
     mpz_clears(a, b, t1, t2, t_a, NULL);
 
     return EXIT_SUCCESS;
+
+error_print:
+    fprintf(stderr, prompt_help, argv[0], argv[0]);
 }

@@ -38,6 +38,8 @@
 #define OUTPUT_TIME (1 << 1)
 #define SHOW_HELP (1)
 
+#define USAGE "\x1b[4;1mUsage:\x1b[0m \x1b[1m%s\x1b[0m [OPTION] <index>\n"
+
 uint64_t get_ns();
 
 void print_calc_time(uint64_t ns);
