@@ -76,13 +76,13 @@ int main(int argc, char *argv[]) {
 
     if (argc < 2) {
     usage:
-        fprintf(flags & SHOW_HELP ? stdout : stderr, message, argv[0]);
-        return flags & SHOW_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
+        fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
+        return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     for (size_t i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-            flags |= SHOW_HELP;
+            flags |= OUTPUT_HELP;
             goto usage;
         } else if (strcmp(argv[i], "-n") == 0 ||
                    strcmp(argv[i], "--num-only") == 0) {

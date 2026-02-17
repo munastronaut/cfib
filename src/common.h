@@ -36,7 +36,7 @@
 #define OUTPUT_NUM (1 << 3)
 #define NO_NEWLINE (1 << 2)
 #define OUTPUT_TIME (1 << 1)
-#define SHOW_HELP (1)
+#define OUTPUT_HELP (1)
 
 #define USAGE "\x1b[4;1mUsage:\x1b[0m \x1b[1m%s\x1b[0m [-n | -r | -t] <index>\n"
 
