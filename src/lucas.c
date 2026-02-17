@@ -71,7 +71,7 @@ uint64_t get_ns() {
 }
 
 void print_calc_time(uint64_t ns) {
-    printf("Calculation time: ");
+    printf("calculation time: ");
 
     if (ns < NS_IN_US) {
         printf("%" PRIu64 "ns\n", ns);
