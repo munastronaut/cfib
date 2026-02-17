@@ -2,13 +2,13 @@
 
 char const *message =
     "\x1b[4;1mUsage:\x1b[0m\n"
-    "\x1b[1m  %s\x1b[0m [OPTIONS] [NUMBER]\n"
+    "\x1b[1m  %s\x1b[0m [OPTION] [NUMBER]\n"
     "\n"
     "\x1b[4;1mOptions:\x1b[0m\n"
-    "\x1b[1m  -n, --number\x1b[0m\t Print number only\n"
-    "\x1b[1m  -r, --raw\x1b[0m\t Print number only, without newline\n"
-    "\x1b[1m  -t, --time\x1b[0m\t Print calculation time only\n"
-    "\x1b[1m  -h, --help\x1b[0m\t Show help\n";
+    "\x1b[1m  -n, --num-only\x1b[0m\t Print number only\n"
+    "\x1b[1m  -r, --raw-only\x1b[0m\t Print number only, without newline\n"
+    "\x1b[1m  -t, --time-only\x1b[0m\t Print calculation time only\n"
+    "\x1b[1m  -h, --help\x1b[0m\t\t Print this help and exit\n";
 
 uint64_t get_ns() {
 #if defined(_WIN32)
@@ -80,14 +80,14 @@ int main(int argc, char *argv[]) {
             flags |= SHOW_HELP;
             goto usage;
         } else if (strcmp(argv[i], "-n") == 0 ||
-                   strcmp(argv[i], "--number") == 0) {
+                   strcmp(argv[i], "--num-only") == 0) {
             flags &= ~OUTPUT_TIME;
         } else if (strcmp(argv[i], "-r") == 0 ||
-                   strcmp(argv[i], "--raw") == 0) {
+                   strcmp(argv[i], "--raw-only") == 0) {
             flags &= ~OUTPUT_TIME;
             flags |= NO_NEWLINE;
         } else if (strcmp(argv[i], "-t") == 0 ||
-                   strcmp(argv[i], "--time") == 0) {
+                   strcmp(argv[i], "--time-only") == 0) {
             flags &= ~OUTPUT_NUM;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
             fprintf(stderr, "\x1b[1m%s:\x1b[0m unknown option %s\n", argv[0],
