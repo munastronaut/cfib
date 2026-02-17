@@ -20,12 +20,12 @@ uint64_t get_ns() {
     }
     LARGE_INTEGER counter;
     QueryPerformanceCounter(&counter);
-    return (uint64_t)((counter.QuadPart * INT64_C(1000000000)) /
+    return (uint64_t)((counter.QuadPart * (int64_t)NS_IN_S) /
                       frequency.QuadPart);
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * UINT64_C(1000000000) + ts.tv_nsec;
+    return (uint64_t)ts.tv_sec * NS_IN_S + ts.tv_nsec;
 #endif
 }
 
