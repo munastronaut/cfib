@@ -71,7 +71,7 @@ uint64_t get_ns() {
 }
 
 void print_calc_time(uint64_t ns) {
-    printf("calculation time: ");
+    printf("\x1b[1mcalculation time:\x1b[0m ");
 
     if (ns < NS_IN_US) {
         printf("%" PRIu64 "ns\n", ns);
@@ -131,11 +131,13 @@ int main(int argc, char *argv[]) {
                    strcmp(argv[i], "--time") == 0) {
             flags &= ~OUTPUT_NUM;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
-            fprintf(stderr, "%s: unknown option %s\n", argv[0], argv[i]);
+            fprintf(stderr, "\x1b[1m%s:\x1b[0m unknown option %s\n", argv[0],
+                    argv[i]);
             goto usage;
         } else {
             if (num_arg != NULL) {
-                fprintf(stderr, "%s: multiple numbers passed\n", argv[0]);
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple numbers passed\n",
+                        argv[0]);
                 goto usage;
             }
             num_arg = argv[i];
@@ -149,7 +151,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (!num_arg) {
-        fprintf(stderr, "%s: input number not provided\n", argv[0]);
+        fprintf(stderr, "\x1b[1m%s:\x1b[0m input number not provided\n",
+                argv[0]);
         goto usage;
     }
 
@@ -158,7 +161,9 @@ int main(int argc, char *argv[]) {
         ++p;
 
     if (*p == '-') {
-        fprintf(stderr, "%s: input must be a nonnegative integer\n", argv[0]);
+        fprintf(stderr,
+                "\x1b[1m%s:\x1b[0m input must be a nonnegative integer\n",
+                argv[0]);
         goto usage;
     }
 
@@ -168,12 +173,15 @@ int main(int argc, char *argv[]) {
     uint64_t n = strtoull(num_arg, &endptr, 10);
 
     if (errno == ERANGE) {
-        fprintf(stderr, "%s: value outside of unsigned 64-bit integer range\n",
+        fprintf(stderr,
+                "\x1b[1m%s:\x1b[0m value outside of unsigned 64-bit integer "
+                "range\n",
                 argv[0]);
         goto usage;
     }
     if (endptr == num_arg || *endptr != '\0') {
-        fprintf(stderr, "%s: could not parse number input\n", argv[0]);
+        fprintf(stderr, "\x1b[1m%s:\x1b[0m could not parse number input\n",
+                argv[0]);
         goto usage;
     }
 
@@ -217,7 +225,7 @@ int main(int argc, char *argv[]) {
 
     if (flags & OUTPUT_NUM) {
         if (flags & OUTPUT_TIME)
-            printf("F_%" PRIu64 " = ", n);
+            printf("\x1b[1mF_%" PRIu64 "\x1b[0m = ", n);
 
         mpz_out_str(stdout, 10, a);
         if (!(flags & NO_NEWLINE))
