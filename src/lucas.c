@@ -34,12 +34,13 @@
 #define OUTPUT_TIME (1 << 1)
 #define SHOW_HELP 1
 
-char const *message = "Usage: %s [OPTIONS] [NUMBER]\n\n"
-                      "OPTIONS:\n"
-                      "  -n, --number\t Print number only\n"
-                      "  -r, --raw\t Print number only, without newline\n"
-                      "  -t, --time\t Print calculation time only\n"
-                      "  -h, --help\t Show help\n";
+char const *message =
+    "\x1b[4;1mUsage:\x1b[0m \x1b[1m%s\x1b[0m [OPTIONS] [NUMBER]\n\n"
+    "\x1b[4;1mOptions:\x1b[0m\n"
+    "\x1b[1m  -n, --number\x1b[0m\t Print number only\n"
+    "\x1b[1m  -r, --raw\x1b[0m\t Print number only, without newline\n"
+    "\x1b[1m  -t, --time\x1b[0m\t Print calculation time only\n"
+    "\x1b[1m  -h, --help\x1b[0m\t Show help\n";
 
 uint64_t get_ns() {
 #if defined(_WIN32)
