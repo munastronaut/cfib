@@ -1,8 +1,0 @@
-[4;1mUsage:[0m
-[1m  bin/fib[0m [OPTIONS] [NUMBER]
-
-[4;1mOptions:[0m
-[1m  -n, --number[0m	 Print number only
-[1m  -r, --raw[0m	 Print number only, without newline
-[1m  -t, --time[0m	 Print calculation time only
-[1m  -h, --help[0m	 Show help
