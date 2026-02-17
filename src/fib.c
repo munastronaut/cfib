@@ -29,6 +29,11 @@
 
 #define LOG2_PHI 0.694242
 
+#define OUTPUT_NUM (1 << 3)
+#define NO_NEWLINE (1 << 2)
+#define OUTPUT_TIME (1 << 1)
+#define SHOW_HELP 1
+
 char const *message = "Usage: %s [OPTIONS] [NUMBER]\n\n"
                       "OPTIONS:\n"
                       "  -n, --number\t Print number only\n"
@@ -101,32 +106,29 @@ void print_calc_time(uint64_t ns) {
 }
 
 int main(int argc, char *argv[]) {
-    int output_num = 1;
-    int no_newline = 0;
-    int output_time = 1;
-    int request_help = 0;
+    uint8_t flags = 0xa;
     char *num_arg = NULL;
 
     if (argc < 2) {
     usage:
-        fprintf(request_help ? stdout : stderr, message, argv[0]);
-        return request_help ? EXIT_SUCCESS : EXIT_FAILURE;
+        fprintf(flags & SHOW_HELP ? stdout : stderr, message, argv[0]);
+        return flags & SHOW_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     for (size_t i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-            request_help = 1;
+            flags |= SHOW_HELP;
             goto usage;
         } else if (strcmp(argv[i], "-n") == 0 ||
                    strcmp(argv[i], "--number") == 0) {
-            output_time = 0;
+            flags &= ~OUTPUT_TIME;
         } else if (strcmp(argv[i], "-r") == 0 ||
                    strcmp(argv[i], "--raw") == 0) {
-            output_time = 0;
-            no_newline = 1;
+            flags &= ~OUTPUT_TIME;
+            flags |= NO_NEWLINE;
         } else if (strcmp(argv[i], "-t") == 0 ||
                    strcmp(argv[i], "--time") == 0) {
-            output_num = 0;
+            flags &= ~OUTPUT_NUM;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
             fprintf(stderr, "%s: unknown option %s\n", argv[0], argv[i]);
             goto usage;
@@ -139,13 +141,16 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (output_time == output_num && output_num == 0) {
+    if ((flags & OUTPUT_TIME) == (flags & OUTPUT_NUM) &&
+        !(flags & OUTPUT_NUM)) {
         fputs("?\n", stderr);
         return EXIT_FAILURE;
     }
 
-    if (!num_arg)
+    if (!num_arg) {
+        fprintf(stderr, "%s: input number not provided\n", argv[0]);
         goto usage;
+    }
 
     char *p = num_arg;
     while (isspace(*p))
@@ -153,7 +158,7 @@ int main(int argc, char *argv[]) {
 
     if (*p == '-') {
         fprintf(stderr, "%s: input must be a nonnegative integer\n", argv[0]);
-        return EXIT_FAILURE;
+        goto usage;
     }
 
     errno = 0;
@@ -164,11 +169,11 @@ int main(int argc, char *argv[]) {
     if (errno == ERANGE) {
         fprintf(stderr, "%s: value outside of unsigned 64-bit integer range\n",
                 argv[0]);
-        return EXIT_FAILURE;
+        goto usage;
     }
     if (endptr == num_arg || *endptr != '\0') {
         fprintf(stderr, "%s: could not parse number input\n", argv[0]);
-        return EXIT_FAILURE;
+        goto usage;
     }
 
     size_t bits = (size_t)(n * LOG2_PHI) + 2;
@@ -209,16 +214,16 @@ int main(int argc, char *argv[]) {
     }
     uint64_t end = get_ns();
 
-    if (output_num) {
-        if (output_time)
+    if (flags & OUTPUT_NUM) {
+        if (flags & OUTPUT_TIME)
             printf("F_%" PRIu64 " = ", n);
 
         mpz_out_str(stdout, 10, a);
-        if (!no_newline)
+        if (!(flags & NO_NEWLINE))
             putchar('\n');
     }
 
-    if (output_time)
+    if (flags & OUTPUT_TIME)
         print_calc_time(end - start);
 
     fflush(stdout);
