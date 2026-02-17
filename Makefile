@@ -1,5 +1,5 @@
 CC = cc
-FLAGS = -O3 -Wall -lgmp
+FLAGS = -O3 -Wall -lgmp -s
 
 SRC = src
 BIN = bin
