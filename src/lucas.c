@@ -69,7 +69,7 @@ void print_calc_time(uint64_t ns) {
 }
 
 int main(int argc, char *argv[]) {
-    uint8_t flags = 0xa;
+    uint8_t flags = OUTPUT_NUM | OUTPUT_TIME;
     char *num_arg = NULL;
 
     if (!isatty(STDOUT_FILENO)) {
