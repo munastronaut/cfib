@@ -1,15 +1,16 @@
 #include "common.h"
 
-char const *message = "A program that calculates Lucas numbers\n"
-                      "\n" USAGE "\n"
-                      "\x1b[4;1mArguments:\x1b[0m\n"
-                      "  <index>\t\tthe index of the Lucas number\n"
-                      "\n"
-                      "\x1b[4;1mOptions:\x1b[0m\n"
-                      "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only, with newline\n"
-                      "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline\n"
-                      "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
-                      "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
+char const *message =
+    "A program that calculates Lucas numbers\n"
+    "\n" USAGE "\n"
+    "\x1b[4;1mArguments:\x1b[0m\n"
+    "  <index>\t\tthe index of the Lucas number\n"
+    "\n"
+    "\x1b[4;1mOptions:\x1b[0m\n"
+    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only, with newline\n"
+    "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline (default when piping)\n"
+    "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
+    "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
 
 char const *prompt_help = "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
 
@@ -70,6 +71,11 @@ void print_calc_time(uint64_t ns) {
 int main(int argc, char *argv[]) {
     uint8_t flags = 0xa;
     char *num_arg = NULL;
+
+    if (!isatty(STDOUT_FILENO)) {
+        flags &= ~OUTPUT_TIME;
+        flags |= NO_NEWLINE;
+    }
 
     for (size_t i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {

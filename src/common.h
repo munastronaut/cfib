@@ -13,15 +13,19 @@
 #include <gmp.h>
 #include <inttypes.h>
 #include <stdlib.h>
-#if defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #include <intrin.h>
+#include <io.h>
 #pragma intrinsic(__lzcnt)
+#define isatty _isatty
+#define STDOUT_FILENO _fileno(stdout)
 #else
 #include <time.h>
+#include <unistd.h>
 #endif
 
-#if defined(_WIN32)
+#ifdef _MSC_VER
 #define COUNT_LEADING_ZEROS(x) __lzcnt64((x))
 #else
 #define COUNT_LEADING_ZEROS(x) __builtin_clzll((x))
