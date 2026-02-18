@@ -7,7 +7,7 @@ char const *message =
     "  <index>\t\tthe index of the Lucas number\n"
     "\n"
     "\x1b[4;1mOptions:\x1b[0m\n"
-    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only\n"
+    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only, with newline\n"
     "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline\n"
     "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
     "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
@@ -74,12 +74,6 @@ int main(int argc, char *argv[]) {
     uint8_t flags = 0xa;
     char *num_arg = NULL;
 
-    if (argc < 2) {
-    usage:
-        fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
-        return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
-    }
-
     for (size_t i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             flags |= OUTPUT_HELP;
@@ -117,8 +111,15 @@ int main(int argc, char *argv[]) {
     }
 
     if (!num_arg) {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
-        goto error_print;
+        static char buf[64];
+        if (fgets(buf, sizeof(buf), stdin)) {
+            buf[strcspn(buf, "\r\n")] = 0;
+            if (buf[0] == '\0') {
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
+                goto error_print;
+            }
+            num_arg = buf;
+        }
     }
 
     char *p = num_arg;
@@ -205,6 +206,9 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 
+usage:
+    fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
+    return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
 error_print:
     fprintf(stderr, prompt_help, argv[0], argv[0]);
 }

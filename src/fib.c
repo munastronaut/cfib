@@ -1,19 +1,17 @@
 #include "common.h"
 
-char const *message =
-    "A program that calculates Fibonacci numbers\n"
-    "\n" USAGE "\n"
-    "\x1b[4;1mArguments:\x1b[0m\n"
-    "  <index>\t\tthe index of the Fibonacci number\n"
-    "\n"
-    "\x1b[4;1mOptions:\x1b[0m\n"
-    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only\n"
-    "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline\n"
-    "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
-    "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
+char const *message = "A program that calculates Fibonacci numbers\n"
+                      "\n" USAGE "\n"
+                      "\x1b[4;1mArguments:\x1b[0m\n"
+                      "  <index>\t\tthe index of the Fibonacci number\n"
+                      "\n"
+                      "\x1b[4;1mOptions:\x1b[0m\n"
+                      "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only, with newline\n"
+                      "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline\n"
+                      "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
+                      "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
 
-char const *prompt_help =
-    "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
+char const *prompt_help = "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
 
 uint64_t get_ns() {
 #if defined(_WIN32)
@@ -25,8 +23,7 @@ uint64_t get_ns() {
     }
     LARGE_INTEGER counter;
     QueryPerformanceCounter(&counter);
-    return (uint64_t)((counter.QuadPart * (int64_t)NS_IN_S) /
-                      frequency.QuadPart);
+    return (uint64_t)((counter.QuadPart * (int64_t)NS_IN_S) / frequency.QuadPart);
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -74,51 +71,45 @@ int main(int argc, char *argv[]) {
     uint8_t flags = 0xa;
     char *num_arg = NULL;
 
-    if (argc < 2) {
-    usage:
-        fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
-        return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
-    }
-
     for (size_t i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             flags |= OUTPUT_HELP;
             goto usage;
-        } else if (strcmp(argv[i], "-n") == 0 ||
-                   strcmp(argv[i], "--num-only") == 0) {
+        } else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--num-only") == 0) {
             flags &= ~OUTPUT_TIME;
-        } else if (strcmp(argv[i], "-r") == 0 ||
-                   strcmp(argv[i], "--raw-only") == 0) {
+        } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--raw-only") == 0) {
             flags &= ~OUTPUT_TIME;
             flags |= NO_NEWLINE;
-        } else if (strcmp(argv[i], "-t") == 0 ||
-                   strcmp(argv[i], "--time-only") == 0) {
+        } else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--time-only") == 0) {
             flags &= ~OUTPUT_NUM;
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
-            fprintf(
-                stderr,
-                "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
-                argv[0], argv[i]);
+            fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
+                    argv[i]);
             goto error_print;
         } else {
             if (num_arg != NULL) {
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n",
-                        argv[0]);
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
                 goto error_print;
             }
             num_arg = argv[i];
         }
     }
 
-    if ((flags & OUTPUT_TIME) == (flags & OUTPUT_NUM) &&
-        !(flags & OUTPUT_NUM)) {
+    if ((flags & OUTPUT_TIME) == (flags & OUTPUT_NUM) && !(flags & OUTPUT_NUM)) {
         fputs("?\n", stderr);
         return EXIT_FAILURE;
     }
 
     if (!num_arg) {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
-        goto error_print;
+        static char buf[64];
+        if (fgets(buf, sizeof(buf), stdin)) {
+            buf[strcspn(buf, "\r\n")] = 0;
+            if (buf[0] == '\0') {
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
+                goto error_print;
+            }
+            num_arg = buf;
+        }
     }
 
     char *p = num_arg;
@@ -126,9 +117,7 @@ int main(int argc, char *argv[]) {
         ++p;
 
     if (*p == '-') {
-        fprintf(stderr,
-                "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n",
-                argv[0]);
+        fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
         goto error_print;
     }
 
@@ -205,6 +194,9 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 
+usage:
+    fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
+    return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
 error_print:
     fprintf(stderr, prompt_help, argv[0], argv[0]);
 }
