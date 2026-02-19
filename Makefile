@@ -1,16 +1,16 @@
 CC = cc
-FLAGS = -O3 -Wall -lgmp
+FLAGS = -O3 -Wall
 LINK = -lgmp -s
 
 SRC = src
 BIN = bin
 
-UTILS = $(SRC)/common.c
+COMMON = $(SRC)/common.c
 TGTS = fib lucas
 
 all: $(addprefix $(BIN)/, $(TGTS))
 
-$(BIN)/%: $(SRC)/%.c $(UTILS)
+$(BIN)/%: $(SRC)/%.c $(COMMON)
 	mkdir -p $(BIN)
 	$(CC) $(FLAGS) $^ -o $@ $(LINK)
 
