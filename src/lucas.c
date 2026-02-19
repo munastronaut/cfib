@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if ((flags & OUTPUT_TIME) == (flags & OUTPUT_NUM) && !(flags & OUTPUT_NUM)) {
+    if (!(flags & OUTPUT_TIME) && !(flags & OUTPUT_NUM)) {
         fputs("?\n", stderr);
         return EXIT_FAILURE;
     }
