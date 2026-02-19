@@ -1,18 +1,20 @@
 CC = cc
-FLAGS = -O3 -Wall -lgmp -s
+FLAGS = -O3 -Wall -lgmp
+LINK = -lgmp -s
 
 SRC = src
 BIN = bin
 
-SRCS = $(wildcard $(SRC)/*.c)
+UTILS = $(SRC)/get_ns.c $(SRC)/print_calc_time.c
+PROGS = $(SRC)/fib.c $(SRC)/lucas.c
 
-BINS = $(patsubst $(SRC)/%.c, $(BIN)/%, $(SRCS))
+BINS = $(BIN)/fib $(BIN)/lucas
 
 all: $(BINS)
 
-$(BIN)/%: $(SRC)/%.c
+$(BIN)/%: $(SRC)/%.c $(UTILS)
 	mkdir -p $(dir $@)
-	$(CC) $(FLAGS) $< -o $@
+	$(CC) $(FLAGS) $< $(UTILS) -o $@ $(LINK)
 
 clean:
 	rm -rf $(BIN)
