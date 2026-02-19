@@ -5,16 +5,14 @@ LINK = -lgmp -s
 SRC = src
 BIN = bin
 
-UTILS = $(SRC)/get_ns.c $(SRC)/print_calc_time.c
-PROGS = $(SRC)/fib.c $(SRC)/lucas.c
+UTILS = $(SRC)/common.c
+TGTS = fib lucas
 
-BINS = $(BIN)/fib $(BIN)/lucas
-
-all: $(BINS)
+all: $(addprefix $(BIN)/, $(TGTS))
 
 $(BIN)/%: $(SRC)/%.c $(UTILS)
-	mkdir -p $(dir $@)
-	$(CC) $(FLAGS) $< $(UTILS) -o $@ $(LINK)
+	mkdir -p $(BIN)
+	$(CC) $(FLAGS) $^ -o $@ $(LINK)
 
 clean:
 	rm -rf $(BIN)

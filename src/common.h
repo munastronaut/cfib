@@ -44,6 +44,9 @@
 
 #define USAGE "\x1b[4;1mUsage:\x1b[0m \x1b[1m%s\x1b[0m [-n | -r | -t] <index>\n"
 
+extern char const *message;
+extern char const *prompt_help;
+
 uint64_t get_ns();
 
 void print_calc_time(uint64_t ns);

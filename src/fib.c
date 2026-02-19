@@ -1,19 +1,5 @@
 #include "common.h"
 
-char const *message =
-    "A program that calculates Fibonacci numbers\n"
-    "\n" USAGE "\n"
-    "\x1b[4;1mArguments:\x1b[0m\n"
-    "  <index>\t\tthe index of the Fibonacci number\n"
-    "\n"
-    "\x1b[4;1mOptions:\x1b[0m\n"
-    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only, with newline\n"
-    "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline (default when piping)\n"
-    "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
-    "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
-
-char const *prompt_help = "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
-
 int main(int argc, char *argv[]) {
     uint8_t flags = OUTPUT_NUM | OUTPUT_TIME;
     char *num_arg = NULL;
@@ -147,7 +133,7 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 
 usage:
-    fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
+    fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, "Fibonacci", argv[0]);
     return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
 error:
     fprintf(stderr, prompt_help, argv[0], argv[0]);
