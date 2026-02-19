@@ -91,11 +91,11 @@ int main(int argc, char *argv[]) {
         } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
             fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
                     argv[i]);
-            goto error_print;
+            goto error;
         } else {
             if (num_arg != NULL) {
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
-                goto error_print;
+                goto error;
             }
             num_arg = argv[i];
         }
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
             buf[strcspn(buf, "\r\n")] = 0;
             if (buf[0] == '\0') {
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
-                goto error_print;
+                goto error;
             }
             num_arg = buf;
         }
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
     if (*p == '-') {
         fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
-        goto error_print;
+        goto error;
     }
 
     errno = 0;
@@ -137,11 +137,11 @@ int main(int argc, char *argv[]) {
                 "\x1b[1m%s:\x1b[0m index outside of unsigned 64-bit integer "
                 "range\n",
                 argv[0]);
-        goto error_print;
+        goto error;
     }
     if (endptr == num_arg || *endptr != '\0') {
         fprintf(stderr, "\x1b[1m%s:\x1b[0m could not parse index\n", argv[0]);
-        goto error_print;
+        goto error;
     }
 
     size_t bits = (size_t)(n * LOG2_PHI) + 2;
@@ -203,6 +203,6 @@ int main(int argc, char *argv[]) {
 usage:
     fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, argv[0]);
     return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
-error_print:
+error:
     fprintf(stderr, prompt_help, argv[0], argv[0]);
 }
