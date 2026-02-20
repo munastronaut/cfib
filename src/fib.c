@@ -1,74 +1,23 @@
 #include "common.h"
 
 int main(int argc, char *argv[]) {
-    uint8_t flags = IS_TTY | OUTPUT_NUM | OUTPUT_TIME;
-    char *num_arg = NULL;
+    ctx_t ctx;
+    status_t status = parse_args(argc, argv, &ctx);
 
-    if (!isatty(STDOUT_FILENO))
-        flags = (flags & ~(IS_TTY | OUTPUT_TIME)) | NO_NEWLINE;
-
-    for (size_t i = 1; i < argc; ++i) {
-        char *arg = argv[i];
-        if (arg[0] == '-' && arg[1] != '\0') {
-            if (arg[1] == '-') {
-                if (strcmp(arg, "--help") == 0) {
-                    flags |= OUTPUT_HELP;
-                    goto usage;
-                }
-                if (strcmp(arg, "--num-only") == 0) {
-                    flags &= ~OUTPUT_TIME;
-                    continue;
-                }
-                if (strcmp(arg, "--raw-only") == 0) {
-                    flags = (flags & ~OUTPUT_TIME) | NO_NEWLINE;
-                    continue;
-                }
-                if (strcmp(arg, "--time-only") == 0) {
-                    flags &= ~OUTPUT_NUM;
-                    continue;
-                }
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
-                        argv[0], arg);
-                goto error;
-            }
-            for (size_t j = 1; arg[j] != '\0'; ++j) {
-                switch (arg[j]) {
-                case 'h':
-                    flags |= OUTPUT_HELP;
-                    goto usage;
-                case 'n':
-                    flags &= ~OUTPUT_TIME;
-                    break;
-                case 'r':
-                    flags = (flags & ~OUTPUT_TIME) | NO_NEWLINE;
-                    break;
-                case 't':
-                    flags &= ~OUTPUT_NUM;
-                    break;
-                default:
-                    if (isdigit(arg[j]) && j == 1)
-                        goto multiple;
-                    fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
-                            argv[0], arg);
-                    goto error;
-                }
-            }
-        } else {
-        multiple:
-            if (num_arg != NULL) {
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
-                goto error;
-            }
-            num_arg = arg;
-        }
+    if (status == PARSE_HELP) {
+        fprintf(stdout, message, "Fibonacci", argv[0]);
+        return EXIT_SUCCESS;
     }
 
-    if ((flags & IS_TTY) && !(flags & OUTPUT_TIME) && !(flags & OUTPUT_NUM)) {
+    if (status == PARSE_ERROR)
+        goto error;
+
+    if ((ctx.flags & IS_TTY) && !(ctx.flags & OUTPUT_TIME) && !(ctx.flags & OUTPUT_NUM)) {
         fputs("?\n", stderr);
         return EXIT_FAILURE;
     }
 
-    if (!num_arg) {
+    if (!ctx.num_arg) {
         static char buf[64];
         if (fgets(buf, sizeof(buf), stdin)) {
             buf[strcspn(buf, "\r\n")] = 0;
@@ -76,11 +25,11 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
                 goto error;
             }
-            num_arg = buf;
+            ctx.num_arg = buf;
         }
     }
 
-    char *p = num_arg;
+    char *p = ctx.num_arg;
     while (isspace(*p))
         ++p;
 
@@ -92,16 +41,14 @@ int main(int argc, char *argv[]) {
     errno = 0;
     char *endptr;
 
-    uint64_t n = strtoull(num_arg, &endptr, 10);
+    uint64_t n = strtoull(ctx.num_arg, &endptr, 10);
 
     if (errno == ERANGE) {
-        fprintf(stderr,
-                "\x1b[1m%s:\x1b[0m index outside of unsigned 64-bit integer "
-                "range\n",
+        fprintf(stderr, "\x1b[1m%s:\x1b[0m index outside of unsigned 64-bit integer range\n",
                 argv[0]);
         goto error;
     }
-    if (endptr == num_arg || *endptr != '\0') {
+    if (endptr == ctx.num_arg || *endptr != '\0') {
         fprintf(stderr, "\x1b[1m%s:\x1b[0m could not parse index\n", argv[0]);
         goto error;
     }
@@ -144,16 +91,16 @@ int main(int argc, char *argv[]) {
     }
     uint64_t end = get_ns();
 
-    if (flags & OUTPUT_NUM) {
-        if (flags & OUTPUT_TIME)
+    if (ctx.flags & OUTPUT_NUM) {
+        if (ctx.flags & OUTPUT_TIME)
             printf("\x1b[1mF_%" PRIu64 "\x1b[0m = ", n);
 
         mpz_out_str(stdout, 10, a);
-        if (!(flags & NO_NEWLINE))
+        if (!(ctx.flags & NO_NEWLINE))
             putchar('\n');
     }
 
-    if (flags & OUTPUT_TIME)
+    if (ctx.flags & OUTPUT_TIME)
         print_calc_time(end - start);
 
     fflush(stdout);
@@ -162,9 +109,7 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 
-usage:
-    fprintf(flags & OUTPUT_HELP ? stdout : stderr, message, "Fibonacci", argv[0]);
-    return flags & OUTPUT_HELP ? EXIT_SUCCESS : EXIT_FAILURE;
 error:
     fprintf(stderr, prompt_help, argv[0], argv[0]);
+    return EXIT_FAILURE;
 }
