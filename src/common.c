@@ -14,6 +14,58 @@ char const *message =
 
 char const *prompt_help = "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
 
+struct option const long_options[] = {
+    {"help", no_argument, NULL, 'h'},
+    {"num-only", no_argument, NULL, 'n'},
+    {"raw-only", no_argument, NULL, 'r'},
+    {"time-only", no_argument, NULL, 't'},
+    {NULL, 0, NULL, 0},
+};
+
+status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
+    int opt;
+
+    ctx->flags = IS_TTY | OUTPUT_NUM | OUTPUT_TIME;
+    ctx->num_arg = NULL;
+
+    if (!isatty(STDOUT_FILENO))
+        ctx->flags = (ctx->flags & ~(IS_TTY | OUTPUT_TIME)) | NO_NEWLINE;
+
+    optind = 1;
+
+    while ((opt = getopt_long(argc, argv, "hnrt", long_options, NULL)) != -1) {
+        switch (opt) {
+        case 'h':
+            ctx->flags |= OUTPUT_HELP;
+            return PARSE_HELP;
+        case 'n':
+            ctx->flags &= ~OUTPUT_TIME;
+            break;
+        case 'r':
+            ctx->flags = (ctx->flags & ~OUTPUT_TIME) | NO_NEWLINE;
+            break;
+        case 't':
+            ctx->flags &= ~OUTPUT_NUM;
+            break;
+        case '?':
+            fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
+                    argv[optind - 1]);
+            return PARSE_ERROR;
+        default:
+            return PARSE_ERROR;
+        }
+    }
+    if (optind < argc) {
+        ctx->num_arg = argv[optind];
+        if (optind + 1 < argc) {
+            fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
+            return PARSE_ERROR;
+        }
+    }
+
+    return PARSE_SUCCESS;
+}
+
 uint64_t get_ns() {
 #if defined(_WIN32)
     static LARGE_INTEGER frequency;

@@ -15,21 +15,16 @@
 #include <stdlib.h>
 #ifdef _WIN32
 #include <windows.h>
-#include <intrin.h>
 #include <io.h>
-#pragma intrinsic(__lzcnt)
 #define isatty _isatty
 #define STDOUT_FILENO _fileno(stdout)
 #else
 #include <time.h>
 #include <unistd.h>
+#include <getopt.h>
 #endif
 
-#ifdef _MSC_VER
-#define COUNT_LEADING_ZEROS(x) __lzcnt64((x))
-#else
-#define COUNT_LEADING_ZEROS(x) __builtin_clzll((x))
-#endif
+#define COUNT_LEADING_ZEROS __builtin_clzll
 
 #define NS_IN_US 1000
 #define NS_IN_MS 1000000
@@ -37,16 +32,33 @@
 
 #define LOG2_PHI 0.694242
 
-#define IS_TTY (1 << 4)
-#define OUTPUT_NUM (1 << 3)
-#define NO_NEWLINE (1 << 2)
-#define OUTPUT_TIME (1 << 1)
-#define OUTPUT_HELP (1)
-
 #define USAGE "\x1b[4;1mUsage:\x1b[0m \x1b[1m%s\x1b[0m [-n | -r | -t] <index>\n"
 
 extern char const *message;
 extern char const *prompt_help;
+
+typedef enum {
+    OUTPUT_HELP = (1 << 0),
+    OUTPUT_TIME = (1 << 1),
+    NO_NEWLINE = (1 << 2),
+    OUTPUT_NUM = (1 << 3),
+    IS_TTY = (1 << 4),
+} flags_t;
+
+typedef enum {
+    PARSE_SUCCESS,
+    PARSE_ERROR,
+    PARSE_HELP,
+} status_t;
+
+typedef struct {
+    uint8_t flags;
+    char *num_arg;
+} ctx_t;
+
+extern struct option const long_options[];
+
+status_t parse_args(int argc, char *argv[], ctx_t *ctx);
 
 uint64_t get_ns();
 
