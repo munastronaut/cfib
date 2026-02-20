@@ -4,33 +4,61 @@ int main(int argc, char *argv[]) {
     uint8_t flags = IS_TTY | OUTPUT_NUM | OUTPUT_TIME;
     char *num_arg = NULL;
 
-    if (!isatty(STDOUT_FILENO)) {
-        flags &= ~IS_TTY;
-        flags &= ~OUTPUT_TIME;
-        flags |= NO_NEWLINE;
-    }
+    if (!isatty(STDOUT_FILENO))
+        flags = (flags & ~(IS_TTY | OUTPUT_TIME)) | NO_NEWLINE;
 
     for (size_t i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-            flags |= OUTPUT_HELP;
-            goto usage;
-        } else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--num-only") == 0) {
-            flags &= ~OUTPUT_TIME;
-        } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--raw-only") == 0) {
-            flags &= ~OUTPUT_TIME;
-            flags |= NO_NEWLINE;
-        } else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--time-only") == 0) {
-            flags &= ~OUTPUT_NUM;
-        } else if (argv[i][0] == '-' && !isdigit(argv[i][1])) {
-            fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
-                    argv[i]);
-            goto error;
+        char *arg = argv[i];
+        if (arg[0] == '-' && arg[1] != '\0') {
+            if (arg[1] == '-') {
+                if (strcmp(arg, "--help") == 0) {
+                    flags |= OUTPUT_HELP;
+                    goto usage;
+                }
+                if (strcmp(arg, "--num-only") == 0) {
+                    flags &= ~OUTPUT_TIME;
+                    continue;
+                }
+                if (strcmp(arg, "--raw-only") == 0) {
+                    flags = (flags & ~OUTPUT_TIME) | NO_NEWLINE;
+                    continue;
+                }
+                if (strcmp(arg, "--time-only") == 0) {
+                    flags &= ~OUTPUT_NUM;
+                    continue;
+                }
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
+                        arg);
+                goto error;
+            }
+            for (size_t j = 1; arg[j] != '\0'; ++j) {
+                switch (arg[j]) {
+                    case 'h':
+                        flags |= OUTPUT_HELP;
+                        goto usage;
+                    case 'n':
+                        flags &= ~OUTPUT_TIME;
+                        break;
+                    case 'r':
+                        flags = (flags & ~OUTPUT_TIME) | NO_NEWLINE;
+                        break;
+                    case 't':
+                        flags &= ~OUTPUT_NUM;
+                        break;
+                    default:
+                        if (isdigit(arg[j]) && j == 1) goto multiple;
+                        fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
+                                arg);
+                        goto error;
+                }
+            }
         } else {
+            multiple:
             if (num_arg != NULL) {
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
                 goto error;
             }
-            num_arg = argv[i];
+            num_arg = arg;
         }
     }
 
