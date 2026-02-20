@@ -54,8 +54,8 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
                 return PARSE_ERROR;
             }
             if (optopt)
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m-%c\x1b[0m'\n",
-                        argv[0], optopt);
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m invalid option -- '\x1b[1m%c\x1b[0m'\n", argv[0],
+                        optopt);
             else
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
                         argv[0], argv[optind - 1]);
