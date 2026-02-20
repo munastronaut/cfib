@@ -24,6 +24,7 @@ struct option const long_options[] = {
 
 status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
     int opt;
+    opterr = 0;
 
     ctx->flags = IS_TTY | OUTPUT_NUM | OUTPUT_TIME;
     ctx->num_arg = NULL;
@@ -48,8 +49,12 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
             ctx->flags &= ~OUTPUT_NUM;
             break;
         case '?':
-            fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
-                    argv[optind - 1]);
+            if (optopt)
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m-%c\x1b[0m'\n",
+                        argv[0], optopt);
+            else
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
+                        argv[0], argv[optind - 1]);
             return PARSE_ERROR;
         default:
             return PARSE_ERROR;
