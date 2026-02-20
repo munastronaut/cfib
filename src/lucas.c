@@ -27,33 +27,34 @@ int main(int argc, char *argv[]) {
                     flags &= ~OUTPUT_NUM;
                     continue;
                 }
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
-                        arg);
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
+                        argv[0], arg);
                 goto error;
             }
             for (size_t j = 1; arg[j] != '\0'; ++j) {
                 switch (arg[j]) {
-                    case 'h':
-                        flags |= OUTPUT_HELP;
-                        goto usage;
-                    case 'n':
-                        flags &= ~OUTPUT_TIME;
-                        break;
-                    case 'r':
-                        flags = (flags & ~OUTPUT_TIME) | NO_NEWLINE;
-                        break;
-                    case 't':
-                        flags &= ~OUTPUT_NUM;
-                        break;
-                    default:
-                        if (isdigit(arg[j]) && j == 1) goto multiple;
-                        fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n", argv[0],
-                                arg);
-                        goto error;
+                case 'h':
+                    flags |= OUTPUT_HELP;
+                    goto usage;
+                case 'n':
+                    flags &= ~OUTPUT_TIME;
+                    break;
+                case 'r':
+                    flags = (flags & ~OUTPUT_TIME) | NO_NEWLINE;
+                    break;
+                case 't':
+                    flags &= ~OUTPUT_NUM;
+                    break;
+                default:
+                    if (isdigit(arg[j]) && j == 1)
+                        goto multiple;
+                    fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
+                            argv[0], arg);
+                    goto error;
                 }
             }
         } else {
-            multiple:
+        multiple:
             if (num_arg != NULL) {
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
                 goto error;
