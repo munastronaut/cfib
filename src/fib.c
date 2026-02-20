@@ -1,10 +1,11 @@
 #include "common.h"
 
 int main(int argc, char *argv[]) {
-    uint8_t flags = OUTPUT_NUM | OUTPUT_TIME;
+    uint8_t flags = IS_TTY | OUTPUT_NUM | OUTPUT_TIME;
     char *num_arg = NULL;
 
     if (!isatty(STDOUT_FILENO)) {
+        flags &= ~IS_TTY;
         flags &= ~OUTPUT_TIME;
         flags |= NO_NEWLINE;
     }
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (!(flags & OUTPUT_TIME) && !(flags & OUTPUT_NUM)) {
+    if ((flags & IS_TTY) && !(flags & OUTPUT_TIME) && !(flags & OUTPUT_NUM)) {
         fputs("?\n", stderr);
         return EXIT_FAILURE;
     }

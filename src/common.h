@@ -37,6 +37,7 @@
 
 #define LOG2_PHI 0.694242
 
+#define IS_TTY (1 << 4)
 #define OUTPUT_NUM (1 << 3)
 #define NO_NEWLINE (1 << 2)
 #define OUTPUT_TIME (1 << 1)
