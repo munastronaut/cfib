@@ -49,6 +49,10 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
             ctx->flags &= ~OUTPUT_NUM;
             break;
         case '?':
+            if (optopt >= '0' && optopt <= '9') {
+                fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
+                return PARSE_ERROR;
+            }
             if (optopt)
                 fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m-%c\x1b[0m'\n",
                         argv[0], optopt);
@@ -62,6 +66,10 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
     }
     if (optind < argc) {
         ctx->num_arg = argv[optind];
+        if (ctx->num_arg[0] == '-') {
+            fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
+            return PARSE_ERROR;
+        }
         if (optind + 1 < argc) {
             fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
             return PARSE_ERROR;

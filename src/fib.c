@@ -29,15 +29,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    char *p = ctx.num_arg;
-    while (isspace(*p))
-        ++p;
-
-    if (*p == '-') {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
-        goto error;
-    }
-
     errno = 0;
     char *endptr;
 
