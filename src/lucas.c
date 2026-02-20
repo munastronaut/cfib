@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
     status_t status = parse_args(argc, argv, &ctx);
 
     if (status == PARSE_HELP) {
-        fprintf(stdout, message, "Fibonacci", argv[0]);
+        fprintf(stdout, message, "Lucas", argv[0]);
         return EXIT_SUCCESS;
     }
 
