@@ -13,6 +13,9 @@
 #include <gmp.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
+#include <getopt.h>
+#endif
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
@@ -21,7 +24,6 @@
 #else
 #include <time.h>
 #include <unistd.h>
-#include <getopt.h>
 #endif
 
 #define COUNT_LEADING_ZEROS __builtin_clzll
