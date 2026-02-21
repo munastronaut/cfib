@@ -80,7 +80,7 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
 }
 
 uint64_t get_ns() {
-#if defined(_WIN32)
+#ifdef _WIN32
     static LARGE_INTEGER frequency;
     static int init = 0;
     if (!init) {
