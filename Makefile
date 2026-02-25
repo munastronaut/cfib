@@ -1,5 +1,5 @@
 CC = cc
-FLAGS = -O3 -Wall
+FLAGS = -O3 -Wall -march=native
 LINK = -lgmp -s
 
 SRC = src
