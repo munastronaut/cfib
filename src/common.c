@@ -1,24 +1,10 @@
 #include "common.h"
 
-char const *message =
-    "A program that calculates %s numbers\n"
-    "\n" USAGE "\n"
-    "\x1b[4;1mArguments:\x1b[0m\n"
-    "  <index>\t\tthe index of the Fibonacci number\n"
-    "\n"
-    "\x1b[4;1mOptions:\x1b[0m\n"
-    "\x1b[1m  -n, --num-only\x1b[0m\tPrint number only, with newline\n"
-    "\x1b[1m  -r, --raw-only\x1b[0m\tPrint number only, without newline (default when piping)\n"
-    "\x1b[1m  -t, --time-only\x1b[0m\tPrint calculation time only\n"
-    "\x1b[1m  -h, --help\x1b[0m\t\tPrint this help and exit\n";
-
-char const *prompt_help = "\n" USAGE "Try '\x1b[1m%s --help\x1b[0m' for more information.\n";
-
 struct option const long_options[] = {
     {"help", no_argument, NULL, 'h'},
-    {"num-only", no_argument, NULL, 'n'},
-    {"raw-only", no_argument, NULL, 'r'},
-    {"time-only", no_argument, NULL, 't'},
+    {"num", no_argument, NULL, 'n'},
+    {"raw", no_argument, NULL, 'r'},
+    {"time", no_argument, NULL, 't'},
     {NULL, 0, NULL, 0},
 };
 
@@ -26,11 +12,13 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
     int opt;
     opterr = 0;
 
-    ctx->flags = IS_TTY | OUTPUT_NUM | OUTPUT_TIME;
+    ctx->flags = argc > 2 ? IS_TTY : IS_TTY | OUTPUT_TIME | OUTPUT_NUM;
     ctx->num_arg = NULL;
 
     if (!isatty(STDOUT_FILENO))
-        ctx->flags = (ctx->flags & ~(IS_TTY | OUTPUT_TIME)) | NO_NEWLINE;
+        ctx->flags = (ctx->flags & ~(IS_TTY | OUTPUT_TIME)) | OUTPUT_NUM | NO_NEWLINE;
+    else
+        ctx->flags |= USE_COLOR;
 
     optind = 1;
 
@@ -40,13 +28,13 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
             ctx->flags |= OUTPUT_HELP;
             return PARSE_HELP;
         case 'n':
-            ctx->flags &= ~OUTPUT_TIME;
+            ctx->flags |= OUTPUT_NUM;
             break;
         case 'r':
-            ctx->flags = (ctx->flags & ~OUTPUT_TIME) | NO_NEWLINE;
+            ctx->flags |= (OUTPUT_NUM | NO_NEWLINE);
             break;
         case 't':
-            ctx->flags &= ~OUTPUT_NUM;
+            ctx->flags |= OUTPUT_TIME;
             break;
         case '?':
             if (optopt >= '0' && optopt <= '9') {
@@ -76,6 +64,9 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
         }
     }
 
+    if (getenv("NO_COLOR") != NULL)
+        ctx->flags &= ~USE_COLOR;
+
     return PARSE_SUCCESS;
 }
 
@@ -97,8 +88,12 @@ uint64_t get_ns() {
 #endif
 }
 
-void print_calc_time(uint64_t ns) {
-    printf("\x1b[1mcalculation time:\x1b[0m ");
+style_t const with_ansi = {"\x1b[1m", "\x1b[4m", "\x1b[0m"};
+style_t const no_ansi = {"", "", ""};
+
+void print_calc_time(uint64_t ns, FILE *stream, ctx_t *ctx) {
+    style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
+    fprintf(stream, "%scalculation time:%s ", s->bold, s->reset);
 
     if (ns < NS_IN_US) {
         printf("%" PRIu64 "ns\n", ns);
@@ -130,5 +125,24 @@ void print_calc_time(uint64_t ns) {
     if (p > buf && *p == '.')
         *p-- = '\0';
 
-    printf("%s%s\n", buf, unit);
+    fprintf(stream, "%s%s\n", buf, unit);
+}
+
+// I know how messy these functions look.
+void print_help(ctx_t *ctx, char const *name, char const *type) {
+    style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
+    printf(HELP, type, s->bold, s->uline, s->reset, "\n  ", s->bold, name, s->reset, s->bold,
+           s->uline, s->reset, type, s->bold, s->uline, s->reset, s->bold, s->reset, s->bold,
+           s->reset, s->bold, s->reset, s->bold, s->reset);
+}
+
+void print_prompt_help(ctx_t *ctx, char const *name) {
+    style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
+    fprintf(stderr, PROMPT_HELP, s->bold, s->uline, s->reset, " ", s->bold, name, s->reset, s->bold,
+            name, s->reset);
+}
+
+void print_err(ctx_t *ctx, char const *name, char const *msg) {
+    style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
+    fprintf(stderr, "%s%s:%s %s\n", s->bold, name, s->reset, msg);
 }

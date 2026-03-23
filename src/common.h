@@ -1,3 +1,6 @@
+#ifndef COMMON_H
+#define COMMON_H
+
 #if defined(__linux__) || defined(__FreeBSD__)
 #define _DEFAULT_SOURCE
 #define _POSIX_C_SOURCE 200809L
@@ -34,10 +37,21 @@
 
 #define LOG2_PHI 0.694242
 
-#define USAGE "\x1b[4;1mUsage:\x1b[0m \x1b[1m%s\x1b[0m [-n | -r | -t] <index>\n"
+#define USAGE "%s%susage:%s%s%s%s%s [-n | -r | -t] <index>\n"
 
-extern char const *message;
-extern char const *prompt_help;
+#define HELP                                                                                       \
+    "a program that calculates %s numbers\n"                                                       \
+    "\n" USAGE "\n"                                                                                \
+    "%s%sarguments:%s\n"                                                                           \
+    "  <index>\tthe index of the %s number\n"                                                      \
+    "\n"                                                                                           \
+    "%s%soptions:%s\n"                                                                             \
+    "%s  -n, --num%s\tinclude number in output\n"                                                  \
+    "%s  -r, --raw%s\tprint number only, without newline (default when piping)\n"                  \
+    "%s  -t, --time%s\tinclude calculation time in output\n"                                       \
+    "%s  -h, --help%s\tprint this help and exit\n"
+
+#define PROMPT_HELP "\n" USAGE "Try '%s%s --help%s' for more information.\n"
 
 typedef enum {
     OUTPUT_HELP = (1 << 0),
@@ -45,6 +59,7 @@ typedef enum {
     NO_NEWLINE = (1 << 2),
     OUTPUT_NUM = (1 << 3),
     IS_TTY = (1 << 4),
+    USE_COLOR = (1 << 5),
 } flags_t;
 
 typedef enum {
@@ -64,4 +79,21 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx);
 
 uint64_t get_ns();
 
-void print_calc_time(uint64_t ns);
+void print_calc_time(uint64_t ns, FILE *stream, ctx_t *ctx);
+
+void print_help(ctx_t *ctx, char const *name, char const *type);
+
+void print_prompt_help(ctx_t *ctx, char const *name);
+
+void print_err(ctx_t *ctx, char const *name, char const *msg);
+
+typedef struct {
+    char const *bold;
+    char const *uline;
+    char const *reset;
+} style_t;
+
+extern style_t const with_ansi;
+extern style_t const no_ansi;
+
+#endif

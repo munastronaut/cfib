@@ -5,24 +5,19 @@ int main(int argc, char *argv[]) {
     status_t status = parse_args(argc, argv, &ctx);
 
     if (status == PARSE_HELP) {
-        fprintf(stdout, message, "Fibonacci", argv[0]);
+        print_help(&ctx, argv[0], "Fibonacci");
         return EXIT_SUCCESS;
     }
 
     if (status == PARSE_ERROR)
         goto error;
 
-    if ((ctx.flags & IS_TTY) && !(ctx.flags & OUTPUT_TIME) && !(ctx.flags & OUTPUT_NUM)) {
-        fputs("?\n", stderr);
-        return EXIT_FAILURE;
-    }
-
     if (!ctx.num_arg) {
         static char buf[64];
         if (fgets(buf, sizeof(buf), stdin)) {
             buf[strcspn(buf, "\r\n")] = 0;
             if (buf[0] == '\0') {
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m index not provided\n", argv[0]);
+                print_err(&ctx, argv[0], "index not provided");
                 goto error;
             }
             ctx.num_arg = buf;
@@ -35,12 +30,11 @@ int main(int argc, char *argv[]) {
     uint64_t n = strtoull(ctx.num_arg, &endptr, 10);
 
     if (errno == ERANGE) {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m index outside of unsigned 64-bit integer range\n",
-                argv[0]);
+        print_err(&ctx, argv[0], "index outside of unsigned 64-bit integer range");
         goto error;
     }
     if (endptr == ctx.num_arg || *endptr != '\0') {
-        fprintf(stderr, "\x1b[1m%s:\x1b[0m could not parse index\n", argv[0]);
+        print_err(&ctx, argv[0], "could not parse index");
         goto error;
     }
 
@@ -83,7 +77,7 @@ int main(int argc, char *argv[]) {
     uint64_t end = get_ns();
 
     if (ctx.flags & OUTPUT_NUM) {
-        if (ctx.flags & OUTPUT_TIME)
+        if (ctx.flags & OUTPUT_TIME && !(ctx.flags & NO_NEWLINE))
             printf("\x1b[1mF_%" PRIu64 "\x1b[0m = ", n);
 
         mpz_out_str(stdout, 10, a);
@@ -91,16 +85,21 @@ int main(int argc, char *argv[]) {
             putchar('\n');
     }
 
-    if (ctx.flags & OUTPUT_TIME)
-        print_calc_time(end - start);
-
     fflush(stdout);
+
+    if (ctx.flags & OUTPUT_TIME) {
+        if (ctx.flags & NO_NEWLINE)
+            putchar('\n');
+
+        FILE *stream = (ctx.flags & NO_NEWLINE) ? stderr : stdout;
+        print_calc_time(end - start, stream, &ctx);
+    }
 
     mpz_clears(a, b, t1, t2, t_a, NULL);
 
     return EXIT_SUCCESS;
 
 error:
-    fprintf(stderr, prompt_help, argv[0], argv[0]);
+    print_prompt_help(&ctx, argv[0]);
     return EXIT_FAILURE;
 }
