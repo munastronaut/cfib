@@ -77,8 +77,10 @@ int main(int argc, char *argv[]) {
     uint64_t end = get_ns();
 
     if (ctx.flags & OUTPUT_NUM) {
-        if (ctx.flags & OUTPUT_TIME && !(ctx.flags & NO_NEWLINE))
-            printf("\x1b[1mL_%" PRIu64 "\x1b[0m = ", n);
+        if (ctx.flags & OUTPUT_TIME && !(ctx.flags & NO_NEWLINE)) {
+            style_t const *s = (ctx.flags & USE_COLOR) ? &with_ansi : &no_ansi;
+            printf("%sL_%" PRIu64 "%s = ", s->bold, n, s->reset);
+        }
 
         mpz_out_str(stdout, 10, a);
         if (!(ctx.flags & NO_NEWLINE))

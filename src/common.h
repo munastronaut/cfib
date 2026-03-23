@@ -51,7 +51,7 @@
     "%s  -t, --time%s\tinclude calculation time in output\n"                                       \
     "%s  -h, --help%s\tprint this help and exit\n"
 
-#define PROMPT_HELP "\n" USAGE "Try '%s%s --help%s' for more information.\n"
+#define PROMPT_HELP "\n" USAGE "try '%s%s --help%s' for more information.\n"
 
 typedef enum {
     OUTPUT_HELP = (1 << 0),

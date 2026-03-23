@@ -15,9 +15,12 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
     ctx->flags = argc > 2 ? IS_TTY : IS_TTY | OUTPUT_TIME | OUTPUT_NUM;
     ctx->num_arg = NULL;
 
+    int disable_color = (getenv("NO_COLOR") != NULL);
+
     if (!isatty(STDOUT_FILENO))
         ctx->flags = (ctx->flags & ~(IS_TTY | OUTPUT_TIME)) | OUTPUT_NUM | NO_NEWLINE;
-    else
+
+    if (isatty(STDOUT_FILENO) && !disable_color)
         ctx->flags |= USE_COLOR;
 
     optind = 1;
@@ -38,15 +41,17 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
             break;
         case '?':
             if (optopt >= '0' && optopt <= '9') {
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
+                print_err(ctx, argv[0], "index must be a nonnegative integer");
                 return PARSE_ERROR;
             }
+
+            style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
             if (optopt)
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m invalid option -- '\x1b[1m%c\x1b[0m'\n", argv[0],
-                        optopt);
+                fprintf(stderr, "%s%s:%s invalid option -- '%s%c%s'\n", s->bold, argv[0], s->reset,
+                        s->bold, optopt, s->reset);
             else
-                fprintf(stderr, "\x1b[1m%s:\x1b[0m unrecognized option '\x1b[1m%s\x1b[0m'\n",
-                        argv[0], argv[optind - 1]);
+                fprintf(stderr, "%s%s:%s unrecognized option '%s%s%s'\n", s->bold, argv[0],
+                        s->reset, s->bold, argv[optind - 1], s->reset);
             return PARSE_ERROR;
         default:
             return PARSE_ERROR;
@@ -55,17 +60,14 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
     if (optind < argc) {
         ctx->num_arg = argv[optind];
         if (ctx->num_arg[0] == '-') {
-            fprintf(stderr, "\x1b[1m%s:\x1b[0m index must be a nonnegative integer\n", argv[0]);
+            print_err(ctx, argv[0], "index must be a nonnegative integer");
             return PARSE_ERROR;
         }
         if (optind + 1 < argc) {
-            fprintf(stderr, "\x1b[1m%s:\x1b[0m multiple indices passed\n", argv[0]);
+            print_err(ctx, argv[0], "multiple indices passed");
             return PARSE_ERROR;
         }
     }
-
-    if (getenv("NO_COLOR") != NULL)
-        ctx->flags &= ~USE_COLOR;
 
     return PARSE_SUCCESS;
 }
