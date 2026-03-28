@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 
     if (ctx.flags & OUTPUT_NUM) {
         if (ctx.flags & OUTPUT_TIME && !(ctx.flags & NO_NEWLINE)) {
-            style_t const *s = (ctx.flags & USE_COLOR) ? &with_ansi : &no_ansi;
+            style_t const *s = GET_STYLE(ctx);
             printf("%sF_%" PRIu64 "%s = ", s->bold, n, s->reset);
         }
 

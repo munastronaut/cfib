@@ -38,6 +38,9 @@
 #define LOG2_PHI 0.694242
 
 #define USAGE "%s%susage:%s%s%s%s%s [-n | -r | -t] <index>\n"
+#define USAGE_FMT(name, style, delim)                                                              \
+    ((style)->bold), ((style)->uline), ((style)->reset), (delim), ((style)->bold), (name),         \
+        ((style)->reset)
 
 #define HELP                                                                                       \
     "a program that calculates %s numbers\n"                                                       \
@@ -50,8 +53,16 @@
     "%s  -r, --raw%s\tprint number only, without newline (default when piping)\n"                  \
     "%s  -t, --time%s\tinclude calculation time in output\n"                                       \
     "%s  -h, --help%s\tprint this help and exit\n"
+#define HELP_FMT(type, style)                                                                      \
+    ((style)->bold), ((style)->uline), ((style)->reset), (type), ((style)->bold),                  \
+        ((style)->uline), ((style)->reset), ((style)->bold), ((style)->reset), ((style)->bold),    \
+        ((style)->reset), ((style)->bold), ((style)->reset), ((style)->bold), ((style)->reset)
 
 #define PROMPT_HELP "\n" USAGE "try '%s%s --help%s' for more information.\n"
+#define PROMPT_HELP_FMT(name, style) ((style)->bold), (name), ((style)->reset)
+
+#define GET_STYLE_PTR(ctx) ((ctx)->flags & USE_COLOR) ? &with_ansi : &no_ansi
+#define GET_STYLE(ctx) ((ctx).flags & USE_COLOR) ? &with_ansi : &no_ansi
 
 typedef enum {
     OUTPUT_HELP = (1 << 0),
