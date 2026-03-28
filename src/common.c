@@ -94,7 +94,7 @@ style_t const with_ansi = {"\x1b[1m", "\x1b[4m", "\x1b[0m"};
 style_t const no_ansi = {"", "", ""};
 
 void print_calc_time(uint64_t ns, FILE *stream, ctx_t *ctx) {
-    style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
+    style_t const *s = GET_STYLE_PTR(ctx);
     fprintf(stream, "%scalculation time:%s ", s->bold, s->reset);
 
     if (ns < NS_IN_US) {
