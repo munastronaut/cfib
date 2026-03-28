@@ -1,6 +1,6 @@
 CC = cc
-FLAGS = -O3 -Wall -march=native
-LINK = -lgmp -s
+FLAGS = -O3 -Wall -march=native -s
+LINK = -lgmp
 
 SRC = src
 BIN = bin

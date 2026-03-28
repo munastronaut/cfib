@@ -45,7 +45,7 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
                 return PARSE_ERROR;
             }
 
-            style_t const *s = (ctx->flags & USE_COLOR) ? &with_ansi : &no_ansi;
+            style_t const *s = GET_STYLE_PTR(ctx);
             if (optopt)
                 fprintf(stderr, "%s%s:%s invalid option -- '%s%c%s'\n", s->bold, argv[0], s->reset,
                         s->bold, optopt, s->reset);
