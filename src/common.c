@@ -98,7 +98,7 @@ void print_calc_time(uint64_t ns, FILE *stream, ctx_t *ctx) {
     fprintf(stream, "%scalculation time:%s ", s->bold, s->reset);
 
     if (ns < NS_IN_US) {
-        printf("%" PRIu64 "ns\n", ns);
+        fprintf(stream, "%" PRIu64 "ns\n", ns);
         return;
     }
 
@@ -133,12 +133,12 @@ void print_calc_time(uint64_t ns, FILE *stream, ctx_t *ctx) {
 // I know how messy these functions look.
 void print_help(ctx_t *ctx, char const *name, char const *type) {
     style_t const *s = GET_STYLE_PTR(ctx);
-    printf(HELP, type, USAGE_FMT(name, s, "\n  "), HELP_FMT(type, s));
+    printf(HELP, HELP_FMT(name, type, s));
 }
 
 void print_prompt_help(ctx_t *ctx, char const *name) {
     style_t const *s = GET_STYLE_PTR(ctx);
-    fprintf(stderr, PROMPT_HELP, USAGE_FMT(name, s, " "), PROMPT_HELP_FMT(name, s));
+    fprintf(stderr, PROMPT_HELP, PROMPT_HELP_FMT(name, s));
 }
 
 void print_err(ctx_t *ctx, char const *name, char const *msg) {

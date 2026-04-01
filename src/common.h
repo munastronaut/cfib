@@ -53,13 +53,15 @@
     "%s  -r, --raw%s\tprint number only, without newline (default when piping)\n"                  \
     "%s  -t, --time%s\tinclude calculation time in output\n"                                       \
     "%s  -h, --help%s\tprint this help and exit\n"
-#define HELP_FMT(type, style)                                                                      \
-    ((style)->bold), ((style)->uline), ((style)->reset), (type), ((style)->bold),                  \
-        ((style)->uline), ((style)->reset), ((style)->bold), ((style)->reset), ((style)->bold),    \
-        ((style)->reset), ((style)->bold), ((style)->reset), ((style)->bold), ((style)->reset)
+#define HELP_FMT(name, type, style)                                                                \
+    (type), USAGE_FMT(name, style, "\n  "), ((style)->bold), ((style)->uline), ((style)->reset),   \
+        (type), ((style)->bold), ((style)->uline), ((style)->reset), ((style)->bold),              \
+        ((style)->reset), ((style)->bold), ((style)->reset), ((style)->bold), ((style)->reset),    \
+        ((style)->bold), ((style)->reset)
 
 #define PROMPT_HELP "\n" USAGE "try '%s%s --help%s' for more information.\n"
-#define PROMPT_HELP_FMT(name, style) ((style)->bold), (name), ((style)->reset)
+#define PROMPT_HELP_FMT(name, style)                                                               \
+    USAGE_FMT(name, s, " "), ((style)->bold), (name), ((style)->reset)
 
 #define GET_STYLE_PTR(ctx) ((ctx)->flags & USE_COLOR) ? &with_ansi : &no_ansi
 #define GET_STYLE(ctx) ((ctx).flags & USE_COLOR) ? &with_ansi : &no_ansi
