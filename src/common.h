@@ -9,7 +9,6 @@
 #endif
 
 #include <string.h>
-#include <stdint.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -18,15 +17,6 @@
 #include <stdlib.h>
 #ifndef _MSC_VER
 #include <getopt.h>
-#endif
-#ifdef _WIN32
-#include <windows.h>
-#include <io.h>
-#define isatty _isatty
-#define STDOUT_FILENO _fileno(stdout)
-#else
-#include <time.h>
-#include <unistd.h>
 #endif
 
 #define COUNT_LEADING_ZEROS __builtin_clzll

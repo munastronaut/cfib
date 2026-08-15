@@ -1,5 +1,15 @@
 #include "common.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#define isatty _isatty
+#define STDOUT_FILENO _fileno(stdout)
+#else
+#include <time.h>
+#include <unistd.h>
+#endif
+
 struct option const long_options[] = {
     {"help", no_argument, NULL, 'h'},
     {"num", no_argument, NULL, 'n'},
