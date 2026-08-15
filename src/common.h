@@ -51,7 +51,7 @@
 
 #define PROMPT_HELP "\n" USAGE "try '%s%s --help%s' for more information.\n"
 #define PROMPT_HELP_FMT(name, style)                                                               \
-    USAGE_FMT(name, s, " "), ((style)->bold), (name), ((style)->reset)
+    USAGE_FMT(name, style, " "), ((style)->bold), (name), ((style)->reset)
 
 #define GET_STYLE_PTR(ctx) ((ctx)->flags & USE_COLOR) ? &with_ansi : &no_ansi
 #define GET_STYLE(ctx) ((ctx).flags & USE_COLOR) ? &with_ansi : &no_ansi
