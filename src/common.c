@@ -26,11 +26,12 @@ status_t parse_args(int argc, char *argv[], ctx_t *ctx) {
     ctx->num_arg = NULL;
 
     int disable_color = (getenv("NO_COLOR") != NULL);
+    int stdout_is_tty = isatty(STDOUT_FILENO);
 
-    if (!isatty(STDOUT_FILENO))
+    if (!stdout_is_tty)
         ctx->flags = (ctx->flags & ~(IS_TTY | OUTPUT_TIME)) | OUTPUT_NUM | NO_NEWLINE;
 
-    if (isatty(STDOUT_FILENO) && !disable_color)
+    if (stdout_is_tty && !disable_color)
         ctx->flags |= USE_COLOR;
 
     optind = 1;
